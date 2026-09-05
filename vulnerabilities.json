@@ -1,0 +1,181 @@
+{
+  "scan_metadata": {
+    "scan_date": "2026-09-05T04:41:00Z",
+    "repository": "CICD_Application_K8s",
+    "scanner_tools": ["safety", "bandit", "manual_review"],
+    "scan_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 5,
+    "critical": 2,
+    "high": 0,
+    "medium": 3,
+    "low": 0,
+    "overall_risk": "HIGH"
+  },
+  "vulnerabilities": [
+    {
+      "id": "VULN-001",
+      "title": "Flask Session Cache Poisoning",
+      "severity": "HIGH",
+      "cve": "CVE-2023-30861",
+      "component": "Flask",
+      "current_version": "2.1.0",
+      "fixed_version": "2.2.5",
+      "recommended_version": "3.1.3",
+      "cvss_score": null,
+      "description": "Response containing data intended for one client may be cached and sent to other clients. Session cookies may be shared between users.",
+      "impact": "Session hijacking, unauthorized access, data leakage",
+      "affected_file": "requirements.txt",
+      "references": [
+        "https://getsafety.com/v/55261/97c",
+        "https://github.com/pallets/flask/security/advisories/GHSA-m2qf-hxjv-5gpq"
+      ],
+      "remediation": "Update Flask to version 2.2.5 or higher (recommend 3.1.3)"
+    },
+    {
+      "id": "VULN-002",
+      "title": "Flask Information Disclosure via Cache Headers",
+      "severity": "MEDIUM-HIGH",
+      "cve": "CVE-2026-27205",
+      "component": "Flask",
+      "current_version": "2.1.0",
+      "fixed_version": "3.1.3",
+      "recommended_version": "3.1.3",
+      "cvss_score": null,
+      "description": "Missing cache-variation headers when session object is accessed via certain code paths, leading to potential cache poisoning.",
+      "impact": "Information disclosure, cache poisoning, privacy violations",
+      "affected_file": "requirements.txt",
+      "references": [
+        "https://getsafety.com/v/86909/97c"
+      ],
+      "remediation": "Update Flask to version 3.1.3"
+    },
+    {
+      "id": "VULN-003",
+      "title": "Outdated Python Base Image",
+      "severity": "MEDIUM",
+      "cve": null,
+      "component": "Python",
+      "current_version": "3.8",
+      "fixed_version": "3.12",
+      "recommended_version": "3.12",
+      "cvss_score": null,
+      "description": "Python 3.8 reached end-of-life in October 2024. No security patches available.",
+      "impact": "Missing security updates, exposure to unpatched vulnerabilities",
+      "affected_file": "Dockerfile",
+      "references": [
+        "https://devguide.python.org/versions/"
+      ],
+      "remediation": "Update Dockerfile to use python:3.12-slim-bookworm"
+    },
+    {
+      "id": "VULN-004",
+      "title": "Outdated GitHub Actions",
+      "severity": "MEDIUM",
+      "cve": null,
+      "component": "GitHub Actions",
+      "current_version": "v2-v4",
+      "fixed_version": "v3-v6",
+      "recommended_version": "latest",
+      "cvss_score": null,
+      "description": "Multiple GitHub Actions are using outdated versions with potential security issues.",
+      "impact": "Supply chain vulnerabilities, deprecated dependencies",
+      "affected_file": ".github/workflows/main.yml",
+      "outdated_actions": [
+        "actions/checkout@v2 -> v4",
+        "actions/setup-python@v3 -> v5",
+        "docker/setup-qemu-action@v2 -> v3",
+        "docker/setup-buildx-action@v2 -> v3",
+        "docker/login-action@v2 -> v3",
+        "docker/build-push-action@v4 -> v6"
+      ],
+      "remediation": "Update all GitHub Actions to their latest versions"
+    },
+    {
+      "id": "VULN-005",
+      "title": "Missing Security Headers",
+      "severity": "LOW-MEDIUM",
+      "cve": null,
+      "component": "Flask Application",
+      "current_version": null,
+      "fixed_version": null,
+      "recommended_version": null,
+      "cvss_score": null,
+      "description": "Application does not set security headers like CSP, X-Frame-Options, HSTS, etc.",
+      "impact": "Increased vulnerability to XSS, clickjacking, and MITM attacks",
+      "affected_file": "app.py",
+      "missing_headers": [
+        "Content-Security-Policy",
+        "X-Frame-Options",
+        "X-Content-Type-Options",
+        "Strict-Transport-Security"
+      ],
+      "remediation": "Implement Flask-Talisman or manually add security headers"
+    }
+  ],
+  "security_strengths": [
+    {
+      "check": "Static Code Analysis (Bandit)",
+      "status": "PASS",
+      "details": "No security issues found in Python code"
+    },
+    {
+      "check": "Hardcoded Secrets Scan",
+      "status": "PASS",
+      "details": "No hardcoded credentials or API keys detected"
+    },
+    {
+      "check": "GitHub Secrets Usage",
+      "status": "PASS",
+      "details": "Properly using GitHub Actions secrets for sensitive data"
+    }
+  ],
+  "recommendations": {
+    "immediate": [
+      {
+        "priority": 1,
+        "action": "Update Flask to 3.1.3",
+        "command": "echo 'Flask==3.1.3' > requirements.txt"
+      },
+      {
+        "priority": 2,
+        "action": "Update Python base image to 3.12",
+        "command": "sed -i 's/python:3.8-slim-buster/python:3.12-slim-bookworm/g' Dockerfile"
+      },
+      {
+        "priority": 3,
+        "action": "Update GitHub Actions versions",
+        "command": "Update .github/workflows/main.yml with latest action versions"
+      }
+    ],
+    "short_term": [
+      {
+        "action": "Add Flask-Talisman for security headers",
+        "details": "pip install flask-talisman and configure in app.py"
+      },
+      {
+        "action": "Add security scanning to CI/CD",
+        "details": "Integrate safety or pip-audit into GitHub Actions workflow"
+      },
+      {
+        "action": "Configure secure session handling",
+        "details": "Set SESSION_COOKIE_SECURE, HTTPONLY, and SAMESITE flags"
+      }
+    ],
+    "long_term": [
+      {
+        "action": "Enable Dependabot",
+        "details": "Configure .github/dependabot.yml for automated dependency updates"
+      },
+      {
+        "action": "Implement container scanning",
+        "details": "Use Trivy, Snyk, or similar in CI/CD pipeline"
+      },
+      {
+        "action": "Regular security audits",
+        "details": "Schedule quarterly security assessments"
+      }
+    ]
+  }
+}
